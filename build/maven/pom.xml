@@ -21,12 +21,12 @@
 
   <properties>
     <maven.build.timestamp.format>yyyy.MM.dd.HHmmss</maven.build.timestamp.format>
-    <build.timestamp>2019.05.28.150325</build.timestamp>
-    <build.branch>976728a</build.branch>
+    <build.timestamp>2020.01.03.204533</build.timestamp>
+    <build.branch>b396593</build.branch>
 	<global.version>1.0.0-SNAPSHOT</global.version>
     <!-- Generate a property with the root path of this project -->
     <!-- This is used as a reference for resolving local repositories -->
-	  <maven.root.path>/home/alxbrd/projects/alxbrd/github/mde_optimiser</maven.root.path>
+	  <maven.root.path>/Users/seedjeff/Desktop/mde_optimiser</maven.root.path>
     <!-- Directory where build artifacts are published on deployment -->
     <repositories.output.root>${maven.root.path}/repositories/output</repositories.output.root>
     <repositories.output.m2.mdeoptimiser>${repositories.output.root}/m2/m2.mdeoptimiser.repository</repositories.output.m2.mdeoptimiser>

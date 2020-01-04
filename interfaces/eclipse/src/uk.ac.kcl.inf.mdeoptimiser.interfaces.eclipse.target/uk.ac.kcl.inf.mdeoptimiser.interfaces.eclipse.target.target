@@ -65,7 +65,7 @@
 	<unit id="org.jfree.jcommon" version="1.0.21"/>
 	<unit id="org.hamcrest.java-hamcrest" version="2.0.0.0"/>
 	<unit id="org.sidiff.serge" version="0.0.0" />
-	<repository location="file://home/alxbrd/projects/alxbrd/github/mde_optimiser/repositories/output/p2/p2.mdeoptimiser.repository"/>
+	<repository location="file://Users/seedjeff/Desktop/mde_optimiser/repositories/output/p2/p2.mdeoptimiser.repository"/>
 </location>
 </locations>
 
