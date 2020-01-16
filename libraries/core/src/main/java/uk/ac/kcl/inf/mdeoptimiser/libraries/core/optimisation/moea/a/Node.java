@@ -3,10 +3,15 @@ import org.moeaframework.core.Solution;
 import org.sidiff.common.emf.access.path.axis.Parent;
 
 public class Node {
+
     protected Solution solution;
     protected Node left = null;
     protected Node right = null;
     protected Node parent = null;                 
+    protected int visited = 0;
+    protected double gameValue = 0;
+    protected int childrenVisited = 0;
+
 
     Node(Solution solution) {
         this.solution = solution;
@@ -28,6 +33,27 @@ public class Node {
 
     public void setSolution(Solution solution) {
         this.solution = solution;
+    }
+
+    public void visited(){
+        visited++;
+    }
+
+    public int getChildrenVisited(){
+        return childrenVisited;
+    }
+
+    public double setGameValue(double g){
+        gameValue = g;
+        return gameValue;
+    }
+
+    public double getGameValue(){
+        return gameValue;
+    }
+
+    public int getVisited(){
+        return visited;
     }
 
     public Node getLeft() {

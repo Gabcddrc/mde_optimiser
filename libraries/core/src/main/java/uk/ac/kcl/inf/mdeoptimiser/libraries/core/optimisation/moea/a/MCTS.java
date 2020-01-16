@@ -37,51 +37,56 @@ import org.moeaframework.core.comparator.CrowdingComparator;
 import org.moeaframework.core.comparator.DominanceComparator;
 import org.moeaframework.core.comparator.ParetoDominanceComparator;
 import org.moeaframework.core.operator.TournamentSelection;
+import java.lang.Math; 
 
 /**
- * Implementation of NSGA-II, with the ability to attach an optional
+ * Implementation of NSGA-II, with the ability to attach an optional 
  * &epsilon;-dominance archive.
  * <p>
  * References:
  * <ol>
- * <li>Deb, K. et al. "A Fast Elitist Multi-Objective Genetic Algorithm:
- * NSGA-II." IEEE Transactions on Evolutionary Computation, 6:182-197, 2000.
- * <li>Kollat, J. B., and Reed, P. M. "Comparison of Multi-Objective
- * Evolutionary Algorithms for Long-Term Monitoring Design." Advances in Water
- * Resources, 29(6):792-807, 2006.
+ *   <li>Deb, K. et al.  "A Fast Elitist Multi-Objective Genetic Algorithm:
+ *       NSGA-II."  IEEE Transactions on Evolutionary Computation, 6:182-197, 
+ *       2000.
+ *   <li>Kollat, J. B., and Reed, P. M.  "Comparison of Multi-Objective 
+ *       Evolutionary Algorithms for Long-Term Monitoring Design."  Advances in
+ *       Water Resources, 29(6):792-807, 2006.
  * </ol>
  */
-public class MCTS extends AbstractEvolutionaryAlgorithm implements EpsilonBoxEvolutionaryAlgorithm {
+public class MCTS extends AbstractEvolutionaryAlgorithm implements
+		EpsilonBoxEvolutionaryAlgorithm {
 
 	/**
-	 * The selection operator. If {@code null}, this algorithm uses binary
+	 * The selection operator.  If {@code null}, this algorithm uses binary
 	 * tournament selection without replacement, replicating the behavior of the
 	 * original NSGA-II implementation.
 	 */
 	private final Selection selection;
-	private final TournamentSelection s;
+
 	/**
 	 * The variation operator.
 	 */
 	private final Variation variation;
 
+
+	private final TournamentSelection s;
+
 	private Node root;
-
+	private Node best;
 	private Node choice;
-
 	/**
 	 * Constructs the NSGA-II algorithm with the specified components.
 	 * 
-	 * @param problem        the problem being solved
-	 * @param population     the population used to store solutions
-	 * @param archive        the archive used to store the result; can be
-	 *                       {@code null}
-	 * @param selection      the selection operator
-	 * @param variation      the variation operator
+	 * @param problem the problem being solved
+	 * @param population the population used to store solutions
+	 * @param archive the archive used to store the result; can be {@code null}
+	 * @param selection the selection operator
+	 * @param variation the variation operator
 	 * @param initialization the initialization method
 	 */
-	public MCTS(Problem problem, NondominatedSortingPopulation population, EpsilonBoxDominanceArchive archive,
-			Selection selection, Variation variation, Initialization initialization) {
+	public MCTS(Problem problem, NondominatedSortingPopulation population,
+			EpsilonBoxDominanceArchive archive, Selection selection,
+			Variation variation, Initialization initialization) {
 		super(problem, population, archive, initialization);
 		this.s = (TournamentSelection) selection;
 		this.selection = selection;
@@ -91,6 +96,7 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements EpsilonBoxEvo
 
 	@Override
 	public void iterate() {
+		System.out.println("start MCTS");
 		NondominatedSortingPopulation population = getPopulation();
 		if (root.solution == null) {
 
@@ -104,6 +110,7 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements EpsilonBoxEvo
 			Node right = new Node(expand(next)[0], null, null, root);
 			root.setLeft(left);
 			root.setRight(right);
+			best = root;
 		}
 		else{
 			Solution[] next = new Solution[variation.getArity()];
@@ -112,19 +119,27 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements EpsilonBoxEvo
 			}
 			Node left = new Node(expand(next)[0], null, null, root);
 			Node right = new Node(expand(next)[0], null, null, root);
+			left.setGameValue(compareDomin(left.getSolution(), choice.getSolution()));
+			right.setGameValue(compareDomin(right.getSolution(), choice.getSolution()));
 			choice.setLeft(left);
 			choice.setRight(right);
 		}
 
 		selection();
+		if(compareDomin(choice.getSolution(), best.getSolution()) == -1){
+			best = choice;
+		}
 		population.clear();
-		population.add(choice.getSolution());
-		System.out.println(choice);
+		population.add(best.getSolution());
 	}
 
-	public int compare(Solution solution1, Solution solution2) {
-
+	//-1 solution 1 dominates 2
+	public int compareDomin(Solution solution1, Solution solution2){
 		return s.getComparator().compare(solution1, solution2);
+	}
+
+	public double selectionValue(Node node){
+		return node.setGameValue(node.gameValue + 0.5*Math.sqrt( (Math.log(node.getVisited()))/(double) node.getChildrenVisited()));
 	}
 
 	// Create new Solutions based on parent
@@ -133,44 +148,59 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements EpsilonBoxEvo
 		for (int i = 0; i < 50; i++) {
 			solutions = variation.evolve(parent);
 			evaluateAll(solutions);
-			if (compare(solutions[0], root.getSolution()) != 1) {
+			if(compareDomin(solutions[0], root.getSolution()) != 1){
 				return solutions;
 			}
 		}
-		solutions[0] = null;
 		return solutions;
 	}
 
+	public void backPropagation(){}
+
 	public void selection() {
 		Node select = root;
-		while (select.getRight() == null && select.getLeft() == null &&(select.getLeft().getSolution() != null || select.getRight().getSolution() != null))  {
+		while (select.getRight() != null && select.getLeft() != null)  {
 
 			Node left =  select.getLeft();
 			Node right = select.getRight();
-
-			if (left.getSolution() == null) {
+			if(selectionValue(left)<selectionValue(right)){
 				select = right;
-			} else if (right.getSolution() == null) {
-				select = left;
-			} else if(compare(left.getSolution(), right.getSolution()) == -1){
-				select = left;
 			}
 			else{
-				select = right;
+				select = left;
 			}
+			// if(compareDomin(left.getSolution(), right.getSolution()) == 0){
+			// 	if(left.getVisited()<right.getVisited()){
+			// 		select = left;
+			// 	}
+			// 	else{
+			// 		select = right;
+			// 	}
+			// }
+			// else if(compareDomin(left.getSolution(), right.getSolution()) == -1){
+			// 	select = left;
+			// }
+			// else{
+			// 	select = right;
+			// }
+			select.visited();
 		}
 
 		choice = select;
 	}
 
+
+
 	@Override
 	public EpsilonBoxDominanceArchive getArchive() {
-		return (EpsilonBoxDominanceArchive) super.getArchive();
+		return (EpsilonBoxDominanceArchive)super.getArchive();
 	}
+
+
 
 	@Override
 	public NondominatedSortingPopulation getPopulation() {
-		return (NondominatedSortingPopulation) super.getPopulation();
+		return (NondominatedSortingPopulation)super.getPopulation();
 	}
 
 }
