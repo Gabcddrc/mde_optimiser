@@ -18,6 +18,7 @@
 package uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.a;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -53,7 +54,7 @@ import java.lang.Math;
  *       Water Resources, 29(6):792-807, 2006.
  * </ol>
  */
-public class MCTS extends AbstractEvolutionaryAlgorithm implements
+public class HCS extends AbstractEvolutionaryAlgorithm implements
 		EpsilonBoxEvolutionaryAlgorithm {
 
 	/**
@@ -70,10 +71,6 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 
 
 	private final TournamentSelection s;
-
-	private Node root;
-	private Node best;
-	private Node choice;
 	/**
 	 * Constructs the NSGA-II algorithm with the specified components.
 	 * 
@@ -84,120 +81,61 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 	 * @param variation the variation operator
 	 * @param initialization the initialization method
 	 */
-	public MCTS(Problem problem, NondominatedSortingPopulation population,
+	public HCS(Problem problem, NondominatedSortingPopulation population,
 			EpsilonBoxDominanceArchive archive, Selection selection,
 			Variation variation, Initialization initialization) {
 		super(problem, population, archive, initialization);
 		this.s = (TournamentSelection) selection;
 		this.selection = selection;
 		this.variation = variation;
-		root = new Node();
 	}
 
 	@Override
 	public void iterate() {
-		System.out.println("start MCTS");
 		NondominatedSortingPopulation population = getPopulation();
-		if (root.solution == null) {
-
-			root.setSolution(population.get(0));
-			Solution[] next = new Solution[variation.getArity()];
-			for (int i = 0; i < next.length; i++) {
-				next[i] = root.getSolution();
-			}
-
-			Node left = new Node(expand(next)[0], null, null, root);
-			Node right = new Node(expand(next)[0], null, null, root);
-			root.setLeft(left);
-			root.setRight(right);
-			best = root;
+		Iterator<Solution> itr = population.iterator();
+        Solution besSolution = (Solution) itr.next();
+		Solution[] next = new Solution[variation.getArity()];
+		for (int i = 0; i < next.length; i++) {
+			next[i] = besSolution;
 		}
-		else{
-			Solution[] next = new Solution[variation.getArity()];
-			for (int i = 0; i < next.length; i++) {
-				next[i] = choice.getSolution();
-			}
-			Node left = new Node(expand(next)[0], null, null, root);
-			Node right = new Node(expand(next)[0], null, null, root);
-			left.setGameValue(compareDomin(left.getSolution(), choice.getSolution()));
-			right.setGameValue(compareDomin(right.getSolution(), choice.getSolution()));
-			choice.setLeft(left);
-			choice.setRight(right);
+		besSolution = expand(next);
+		if(besSolution!= null){
+			population.clear();
+			population.add(besSolution);
 		}
 
-		selection();
-		backpropagation();
-		if(compareDomin(choice.getSolution(), best.getSolution()) == -1){
-			best = choice;
-		}
-		population.clear();
-		population.add(best.getSolution());
+
 	}
 
-	//-1 solution 1 dominates 2
 	public int compareDomin(Solution solution1, Solution solution2){
 		return s.getComparator().compare(solution1, solution2);
 	}
 
-	public double selectionValue(Node node){
-		return node.setGameValue(node.gameValue + 0.5*Math.sqrt( (Math.log(node.getVisited()))/(double) node.getChildrenVisited()));
-	}
-
 	// Create new Solutions based on parent
-	public Solution[] expand(Solution[] parent) {
+	public Solution expand(Solution[] parent) {
 		Solution[] solutions = new Solution[variation.getArity()];
 		for (int i = 0; i < 50; i++) {
 			solutions = variation.evolve(parent);
 			evaluateAll(solutions);
-			if(compareDomin(solutions[0], root.getSolution()) != 1){
-				return solutions;
+			if(compareDomin(solutions[0], parent[0]) == -1){
+				return solutions[0];
 			}
 		}
-		return solutions;
+		return null;
 	}
 
-	// Update childrenVisted count
-	public void backpropagation(){
-		Node back = choice;
-		while(!back.getParent().equals(root)){
-			Node temp = back;
-			back = back.getParent();
-			back .setChildrenVisited(temp.getChildrenVisited()+temp.getVisited());
-			// back.setGameValue((back.getGameValue()+temp.getGameValue())/2);
-			back.setGameValue((back.getLeft().getGameValue()+back.getRight().getGameValue())/2);
-		}
-	}
 
-	public void selection() {
-		Node select = root;
-		while (select.getRight() != null && select.getLeft() != null)  {
-
-			Node left =  select.getLeft();
-			Node right = select.getRight();
-			if(selectionValue(left)<selectionValue(right)){
-				select = right;
+	public Solution selection() {
+        Iterator<Solution> itr = population.iterator();
+        Solution besSolution = (Solution) itr.next();
+		while(itr.hasNext()){
+			Solution temp = (Solution) itr.next();
+			if(compareDomin(temp, besSolution) == -1){
+				besSolution = temp;
 			}
-			else{
-				select = left;
-			}
-			// if(compareDomin(left.getSolution(), right.getSolution()) == 0){
-			// 	if(left.getVisited()<right.getVisited()){
-			// 		select = left;
-			// 	}
-			// 	else{
-			// 		select = right;
-			// 	}
-			// }
-			// else if(compareDomin(left.getSolution(), right.getSolution()) == -1){
-			// 	select = left;
-			// }
-			// else{
-			// 	select = right;
-			// }
-			select.visited();
 		}
-
-		choice = select;
+		return besSolution;
 	}
 
 

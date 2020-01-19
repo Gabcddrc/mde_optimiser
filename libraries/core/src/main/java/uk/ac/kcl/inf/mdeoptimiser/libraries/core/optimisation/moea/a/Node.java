@@ -42,7 +42,9 @@ public class Node {
     public int getChildrenVisited(){
         return childrenVisited;
     }
-
+    public void setChildrenVisited(int c){
+        childrenVisited = c;
+    }
     public double setGameValue(double g){
         gameValue = g;
         return gameValue;

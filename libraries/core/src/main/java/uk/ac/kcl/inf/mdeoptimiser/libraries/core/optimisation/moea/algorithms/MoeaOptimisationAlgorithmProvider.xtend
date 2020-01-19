@@ -17,6 +17,7 @@ import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.operators.Moe
 import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.operators.MoeaOptimisationMutationVariation
 import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.operators.MoeaProbabilisticVariation
 import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.a.MCTS
+import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.a.HCS
 
 class MoeaOptimisationAlgorithmProvider extends AlgorithmProvider {
 	
@@ -72,7 +73,7 @@ class MoeaOptimisationAlgorithmProvider extends AlgorithmProvider {
 		
 		var selection = new TournamentSelection(2);
 		
-		new MCTS(
+		new HCS(
 				problem,
 				new NondominatedSortingPopulation(),
 				null, // no archive
