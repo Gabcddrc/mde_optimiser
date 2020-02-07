@@ -8380,7 +8380,7 @@ RULE_SOLVER_ENGINE : ('henshin'|'momot');
 
 RULE_ALGORITHM_FACTORY : ('moea'|'ecj');
 
-RULE_ALGORITHM_NAME : ('eMOEA'|'eNSGAII'|'NSGAII'|'NSGAIII'|'SPEA2');
+RULE_ALGORITHM_NAME : ('eMOEA'|'eNSGAII'|'NSGAII'|'NSGAIII'|'SPEA2'|'MCTS'|'HCS');
 
 RULE_URL : '<' ( options {greedy=false;} : . )*'>';
 

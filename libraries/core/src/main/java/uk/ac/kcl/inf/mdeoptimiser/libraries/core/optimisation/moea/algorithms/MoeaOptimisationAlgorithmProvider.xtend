@@ -27,6 +27,11 @@ class MoeaOptimisationAlgorithmProvider extends AlgorithmProvider {
 		switch algorithm {
 			case "NSGAII":
 				this.algorithm = createNSGAII(problem, properties)
+				// this.algorithm = createMCTS(problem, properties)
+			case "MCTS":
+				this.algorithm = createMCTS(problem, properties)
+			case "HCS":
+				this.algorithm = createHCS(problem, properties )
 			default:
 				throw new UnexpectedAlgorithmException(algorithm)
 		}
@@ -72,7 +77,56 @@ class MoeaOptimisationAlgorithmProvider extends AlgorithmProvider {
 		var initialization = new RandomInitialization(problem, properties.get("populationSize") as Integer)
 		
 		var selection = new TournamentSelection(2);
+
+		new MCTS(
+				problem,
+				new NondominatedSortingPopulation(),
+				null, // no archive
+				selection,
+				getVariation(properties),
+				initialization
+			);
 		
+		// new MCTS2(
+		// 		problem,
+		// 		getVariation(properties),
+		// 		selection
+		// 	) as Algorithm
+
+		// new NSGAII(
+		// 		problem,
+		// 		new NondominatedSortingPopulation(),
+		// 		null, // no archive
+		// 		selection,
+		// 		getVariation(properties),
+		// 		initialization
+		// 	);
+	}
+
+	def Algorithm createMCTS(Problem problem, Properties properties){
+		//Create an initial random population of population size
+		var initialization = new RandomInitialization(problem, properties.get("populationSize") as Integer)
+		
+		var selection = new TournamentSelection(2);
+
+		new MCTS(
+				problem,
+				new NondominatedSortingPopulation(),
+				null, // no archive
+				selection,
+				getVariation(properties),
+				initialization
+			);
+		
+	}
+
+
+	def Algorithm createHCS(Problem problem, Properties properties){
+		//Create an initial random population of population size
+		var initialization = new RandomInitialization(problem, properties.get("populationSize") as Integer)
+		
+		var selection = new TournamentSelection(2);
+
 		new HCS(
 				problem,
 				new NondominatedSortingPopulation(),
@@ -81,6 +135,7 @@ class MoeaOptimisationAlgorithmProvider extends AlgorithmProvider {
 				getVariation(properties),
 				initialization
 			);
+		
 	}
 
 //	

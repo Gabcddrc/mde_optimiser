@@ -34,6 +34,10 @@ class AlgorithmParametersConfiguration {
 		switch algorithm.name {
 			case "NSGAII":
 				getNSGAIIParameters(algorithm)
+			case "MCTS":
+				getNSGAIIParameters(algorithm)
+			case "HCS":
+				getNSGAIIParameters(algorithm)
 			default:
 				throw new UnexpectedAlgorithmException(algorithm.name)
 		}

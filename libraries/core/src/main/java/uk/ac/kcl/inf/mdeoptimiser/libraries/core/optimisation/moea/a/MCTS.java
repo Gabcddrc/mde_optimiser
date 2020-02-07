@@ -18,8 +18,10 @@
 package uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.a;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.*;
 
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.core.EpsilonBoxDominanceArchive;
@@ -37,6 +39,10 @@ import org.moeaframework.core.comparator.CrowdingComparator;
 import org.moeaframework.core.comparator.DominanceComparator;
 import org.moeaframework.core.comparator.ParetoDominanceComparator;
 import org.moeaframework.core.operator.TournamentSelection;
+
+import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.IGuidanceFunction;
+import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.problem.MoeaOptimisationProblem;
+import org.eclipse.emf.ecore.EObject;
 import java.lang.Math; 
 
 /**
@@ -63,6 +69,11 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 	 */
 	private final Selection selection;
 
+	private MoeaOptimisationProblem moeaProblem;
+
+	private SolutionConverter solutionConverter;
+
+	private List<IGuidanceFunction> fitnessFunctions;
 	/**
 	 * The variation operator.
 	 */
@@ -88,16 +99,21 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 			EpsilonBoxDominanceArchive archive, Selection selection,
 			Variation variation, Initialization initialization) {
 		super(problem, population, archive, initialization);
+		this.moeaProblem = (MoeaOptimisationProblem) problem;
+		this.fitnessFunctions = moeaProblem.getConstraintFunctions();
 		this.s = (TournamentSelection) selection;
 		this.selection = selection;
 		this.variation = variation;
 		root = new Node();
+        // choice = root;
+        // best = root;
 	}
 
 	@Override
 	public void iterate() {
 		System.out.println("start MCTS");
 		NondominatedSortingPopulation population = getPopulation();
+
 		if (root.solution == null) {
 
 			root.setSolution(population.get(0));
@@ -119,16 +135,22 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 			}
 			Node left = new Node(expand(next)[0], null, null, root);
 			Node right = new Node(expand(next)[0], null, null, root);
-			left.setGameValue(compareDomin(left.getSolution(), choice.getSolution()));
-			right.setGameValue(compareDomin(right.getSolution(), choice.getSolution()));
+			left.setGameValue(heuristicEstimate(left.getSolution()));
+			right.setGameValue(heuristicEstimate(right.getSolution()));
 			choice.setLeft(left);
 			choice.setRight(right);
 		}
 
+		//select the Node/solution to expand
 		selection();
+
 		backpropagation();
+		// moeaProblem.evaluate(choice.getSolution());
+		// solutionConverter.convert(choice.getSolution());
 		if(compareDomin(choice.getSolution(), best.getSolution()) == -1){
+			System.out.println("prebest"+heuristicEstimate(best.getSolution()));
 			best = choice;
+			System.out.println("choice"+heuristicEstimate(choice.getSolution()));
 		}
 		population.clear();
 		population.add(best.getSolution());
@@ -139,8 +161,18 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 		return s.getComparator().compare(solution1, solution2);
 	}
 
+	public boolean compareHeuristic(Solution solution1, Solution solution2){
+		return heuristicEstimate(solution1) > heuristicEstimate(solution2);
+	}
+
+	// estimate heuristic use fitnesses
+	public double heuristicEstimate(Solution solution){
+		evaluate(solution);
+		return 1.0/Arrays.stream(solution.getObjectives()).sum();
+	}
+
 	public double selectionValue(Node node){
-		return node.setGameValue(node.gameValue + 0.5*Math.sqrt( (Math.log(node.getVisited()))/(double) node.getChildrenVisited()));
+		return node.setGameValue(node.gameValue + 0.5*Math.sqrt( (Math.log((double) node.getVisited()))/(double) node.getChildrenVisited()));
 	}
 
 	// Create new Solutions based on parent
@@ -149,7 +181,7 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 		for (int i = 0; i < 50; i++) {
 			solutions = variation.evolve(parent);
 			evaluateAll(solutions);
-			if(compareDomin(solutions[0], root.getSolution()) != 1){
+			if(compareHeuristic(solutions[0], root.getSolution())){
 				return solutions;
 			}
 		}
@@ -180,20 +212,6 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 			else{
 				select = left;
 			}
-			// if(compareDomin(left.getSolution(), right.getSolution()) == 0){
-			// 	if(left.getVisited()<right.getVisited()){
-			// 		select = left;
-			// 	}
-			// 	else{
-			// 		select = right;
-			// 	}
-			// }
-			// else if(compareDomin(left.getSolution(), right.getSolution()) == -1){
-			// 	select = left;
-			// }
-			// else{
-			// 	select = right;
-			// }
 			select.visited();
 		}
 
