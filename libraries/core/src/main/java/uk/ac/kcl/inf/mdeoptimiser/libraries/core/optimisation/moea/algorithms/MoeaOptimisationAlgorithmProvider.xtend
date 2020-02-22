@@ -78,7 +78,7 @@ class MoeaOptimisationAlgorithmProvider extends AlgorithmProvider {
 		
 		var selection = new TournamentSelection(2);
 
-		new MCTS(
+		new NSGAII(
 				problem,
 				new NondominatedSortingPopulation(),
 				null, // no archive
@@ -86,21 +86,6 @@ class MoeaOptimisationAlgorithmProvider extends AlgorithmProvider {
 				getVariation(properties),
 				initialization
 			);
-		
-		// new MCTS2(
-		// 		problem,
-		// 		getVariation(properties),
-		// 		selection
-		// 	) as Algorithm
-
-		// new NSGAII(
-		// 		problem,
-		// 		new NondominatedSortingPopulation(),
-		// 		null, // no archive
-		// 		selection,
-		// 		getVariation(properties),
-		// 		initialization
-		// 	);
 	}
 
 	def Algorithm createMCTS(Problem problem, Properties properties){

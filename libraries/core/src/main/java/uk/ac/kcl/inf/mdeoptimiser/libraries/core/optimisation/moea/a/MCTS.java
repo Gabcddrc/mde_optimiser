@@ -115,30 +115,10 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 		NondominatedSortingPopulation population = getPopulation();
 
 		if (root.solution == null) {
-
-			root.setSolution(population.get(0));
-			Solution[] next = new Solution[variation.getArity()];
-			for (int i = 0; i < next.length; i++) {
-				next[i] = root.getSolution();
-			}
-
-			Node left = new Node(expand(next)[0], null, null, root);
-			Node right = new Node(expand(next)[0], null, null, root);
-			root.setLeft(left);
-			root.setRight(right);
-			best = root;
+			initialization();
 		}
 		else{
-			Solution[] next = new Solution[variation.getArity()];
-			for (int i = 0; i < next.length; i++) {
-				next[i] = choice.getSolution();
-			}
-			Node left = new Node(expand(next)[0], null, null, root);
-			Node right = new Node(expand(next)[0], null, null, root);
-			left.setGameValue(heuristicEstimate(left.getSolution()));
-			right.setGameValue(heuristicEstimate(right.getSolution()));
-			choice.setLeft(left);
-			choice.setRight(right);
+			expansionMain();
 		}
 
 		//select the Node/solution to expand
@@ -148,12 +128,65 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 		// moeaProblem.evaluate(choice.getSolution());
 		// solutionConverter.convert(choice.getSolution());
 		if(compareDomin(choice.getSolution(), best.getSolution()) == -1){
-			System.out.println("prebest"+heuristicEstimate(best.getSolution()));
 			best = choice;
-			System.out.println("choice"+heuristicEstimate(choice.getSolution()));
 		}
 		population.clear();
 		population.add(best.getSolution());
+		// population.truncate(3);
+	}
+
+	public void initialization(){
+			root.setSolution(population.get(0));
+			Solution[] next = new Solution[variation.getArity()];
+			for (int i = 0; i < next.length; i++) {
+				next[i] = root.getSolution();
+			}
+
+			Node left = new Node(expand(next)[0], null, null, root);
+			Node right = new Node(expand(next)[0], null, null, root);
+			left.setGameValue(heuristicEstimate(left.getSolution()));
+			right.setGameValue(heuristicEstimate(right.getSolution()));
+			// Node d = chooseDominateNode(left, right);
+			// if(d != null){
+			// 	root.setSolution(d.getSolution());
+			// }
+			// else{
+			root.setLeft(left);
+			root.setRight(right);
+			// }
+		
+			best = root;
+	}
+
+	public void expansionMain(){
+			Solution[] next = new Solution[variation.getArity()];
+			for (int i = 0; i < next.length; i++) {
+				next[i] = choice.getSolution();
+			}
+			Node left = new Node(expand(next)[0], null, null, root);
+			Node right = new Node(expand(next)[0], null, null, root);
+			left.setGameValue(heuristicEstimate(left.getSolution()));
+			right.setGameValue(heuristicEstimate(right.getSolution()));
+			// Node d = chooseDominateNode(left, right);
+			// if(d != null){
+			// 	choice.setSolution(d.getSolution());
+			// }
+			// else{
+			choice.setLeft(left);
+			choice.setRight(right);
+			// }
+	}	
+
+	public Node chooseDominateNode(Node node1, Node node2){
+		if(compareDomin(node1.getSolution(), node2.getSolution()) == 0) {
+			return null;
+		}
+		else if(compareDomin(node1.getSolution(), node2.getSolution()) == -1) {
+			return node1;
+		}
+		else{
+			return node2;
+		}
 	}
 
 	//-1 solution 1 dominates 2
@@ -168,7 +201,7 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 	// estimate heuristic use fitnesses
 	public double heuristicEstimate(Solution solution){
 		evaluate(solution);
-		return 1.0/Arrays.stream(solution.getObjectives()).sum();
+		return -1.0*Arrays.stream(solution.getObjectives()).sum();
 	}
 
 	public double selectionValue(Node node){
@@ -188,10 +221,20 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 		return solutions;
 	}
 
+	// public void treeTruncate(){
+	// 	Node tempRoot = root;		
+	// 	while(tempRoot){
+	// 		left = tempRoot.getLeft();
+	// 		right = tempRoot.getRight();
+	// 	}
+
+	// }
+
+
 	// Update childrenVisted count
 	public void backpropagation(){
 		Node back = choice;
-		while(!back.getParent().equals(root)){
+		while( !back.equals(root) && !back.getParent().equals(root)){
 			Node temp = back;
 			back = back.getParent();
 			back .setChildrenVisited(temp.getChildrenVisited()+temp.getVisited());
