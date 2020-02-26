@@ -11,7 +11,7 @@ public class Node {
     protected int visited = 0;
     protected double gameValue = 0;
     protected int childrenVisited = 0;
-
+    // protected double childrenGameValueSq = 0.0;
 
     Node(Solution solution) {
         this.solution = solution;
@@ -26,6 +26,14 @@ public class Node {
         this.right = right;
         this.parent = parent;
     }
+
+    // public double getChildrenGameValueSq(){
+    //     return childrenGameValueSq;
+    // } 
+
+    // public void setChildrenGameValuesq(double c){
+    //     childGameValueSq = c;
+    // }
 
     public Solution getSolution() {
         return this.solution;

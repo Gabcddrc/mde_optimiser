@@ -105,8 +105,7 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 		this.selection = selection;
 		this.variation = variation;
 		root = new Node();
-        // choice = root;
-        // best = root;
+
 	}
 
 	@Override
@@ -125,8 +124,6 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 		selection();
 
 		backpropagation();
-		// moeaProblem.evaluate(choice.getSolution());
-		// solutionConverter.convert(choice.getSolution());
 		if(compareDomin(choice.getSolution(), best.getSolution()) == -1){
 			best = choice;
 		}
@@ -201,13 +198,26 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 	// estimate heuristic use fitnesses and unsatisfied constraints
 	public double heuristicEstimate(Solution solution){
 		evaluate(solution);
-		System.out.println(Arrays.toString(solution.getObjectives()));
 		return ( -1.0*Arrays.stream(solution.getObjectives()).sum() )
 				 - 0.5 * Arrays.stream(solution.getConstraints()).sum()
 				 ;
 	}
 
 	public double selectionValue(Node node){
+		// if(node.getVisited() == 0){
+		// 	// System.out.println("enter");
+		// 	return Double.POSITIVE_INFINITY;
+		// }
+		// // else if(node.getChildrenVisited() == 0){
+		// // 	return Double.POSITIVE_INFINITY;
+		// // }
+		// else{
+		// return node.getGameValue()
+		// 		+ 0.5*Math.sqrt( (Math.log((double) node.getParent().getVisited())  ) / (double) node.getVisited())
+		// 		// + (Math.sqrt(node.getGameValue()*node.getGameValue()  -  node.getParent().getGameValue()*node.getParent().getGameValue() )  + 10)/ (double) node.getVisited() 
+		// ;
+
+		// }
 		if(node.getVisited() == 0){
 			return Double.POSITIVE_INFINITY;
 		}
@@ -238,23 +248,28 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 		Node back = choice;
 		
 		while(back != root && back.getParent() != root){
-			Node temp = back;
 			back = back.getParent();
-			int a = temp.getChildrenVisited()+temp.getVisited();
-			back.setChildrenVisited(temp.getChildrenVisited()+temp.getVisited());
+
+			back.setChildrenVisited(back.getLeft().getChildrenVisited()+back.getLeft().getVisited() + back.getRight().getChildrenVisited()+back.getRight().getVisited());
+
+			// back.setChildrenGameValuesq(back.getLeft().getGameValue()*back.getLeft().getGameValue() + back.getLeft().getChildrenGameValueSq() +  back.getRight().getGameValue()*back.getRight().getGameValue() + back.getRight().getChildrenGameValueSq());	
+	
+
 			back.setGameValue((back.getLeft().getGameValue()+back.getRight().getGameValue())/ 2.0 );
+	
 		}
 	}
 
 	//select the next node to be expended
 	public void selection() {
 		Node select = root;
+		select.visited();
 		while (select.getRight() != null && select.getLeft() != null)  {
 
 			Node left =  select.getLeft();
 			Node right = select.getRight();
 		
-
+			// System.out.println(selectionValue(left));
 			if(selectionValue(left)<selectionValue(right)){
 				select = right;
 			}
