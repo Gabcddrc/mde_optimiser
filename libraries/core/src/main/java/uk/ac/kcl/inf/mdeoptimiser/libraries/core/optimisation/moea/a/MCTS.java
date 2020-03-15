@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.*;
 
+
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.core.EpsilonBoxDominanceArchive;
 import org.moeaframework.core.EpsilonBoxEvolutionaryAlgorithm;
@@ -69,15 +70,14 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 	 */
 	private final Selection selection;
 
-	private MoeaOptimisationProblem moeaProblem;
-
-	private SolutionConverter solutionConverter;
-
-	private List<IGuidanceFunction> fitnessFunctions;
+	// private MoeaOptimisationProblem moeaProblem;
+	// private List<IGuidanceFunction> fitnessFunctions;
 	/**
 	 * The variation operator.
 	 */
 	private final Variation variation;
+
+	// private int counter; 
 
 
 	private final TournamentSelection s;
@@ -99,8 +99,8 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 			EpsilonBoxDominanceArchive archive, Selection selection,
 			Variation variation, Initialization initialization) {
 		super(problem, population, archive, initialization);
-		this.moeaProblem = (MoeaOptimisationProblem) problem;
-		this.fitnessFunctions = moeaProblem.getConstraintFunctions();
+		// this.moeaProblem = (MoeaOptimisationProblem) problem;
+		// this.fitnessFunctions = moeaProblem.getConstraintFunctions();
 		this.s = (TournamentSelection) selection;
 		this.selection = selection;
 		this.variation = variation;
@@ -129,6 +129,7 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 		}
 		population.clear();
 		population.add(best.getSolution());
+		// System.out.println(++counter);
 		// population.truncate(3);
 	}
 
@@ -155,6 +156,7 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 			best = root;
 	}
 
+	//Expand selected Node
 	public void expansionMain(){
 			Solution[] next = new Solution[variation.getArity()];
 			for (int i = 0; i < next.length; i++) {
@@ -164,33 +166,18 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 			Node right = new Node(expand(next)[0], null, null, choice);
 			left.setGameValue(heuristicEstimate(left.getSolution()));
 			right.setGameValue(heuristicEstimate(right.getSolution()));
-			// Node d = chooseDominateNode(left, right);
-			// if(d != null){
-			// 	choice.setSolution(d.getSolution());
-			// }
-			// else{
+
 			choice.setLeft(left);
 			choice.setRight(right);
-			// }
+		
 	}	
-
-	public Node chooseDominateNode(Node node1, Node node2){
-		if(compareDomin(node1.getSolution(), node2.getSolution()) == 0) {
-			return null;
-		}
-		else if(compareDomin(node1.getSolution(), node2.getSolution()) == -1) {
-			return node1;
-		}
-		else{
-			return node2;
-		}
-	}
 
 	//-1 solution 1 dominates 2
 	public int compareDomin(Solution solution1, Solution solution2){
 		return s.getComparator().compare(solution1, solution2);
 	}
 
+	
 	public boolean compareHeuristic(Solution solution1, Solution solution2){
 		return heuristicEstimate(solution1) > heuristicEstimate(solution2);
 	}
@@ -203,21 +190,10 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 				 ;
 	}
 
+	//Selection Strategy
 	public double selectionValue(Node node){
-		// if(node.getVisited() == 0){
-		// 	// System.out.println("enter");
-		// 	return Double.POSITIVE_INFINITY;
-		// }
-		// // else if(node.getChildrenVisited() == 0){
-		// // 	return Double.POSITIVE_INFINITY;
-		// // }
-		// else{
-		// return node.getGameValue()
-		// 		+ 0.5*Math.sqrt( (Math.log((double) node.getParent().getVisited())  ) / (double) node.getVisited())
-		// 		// + (Math.sqrt(node.getGameValue()*node.getGameValue()  -  node.getParent().getGameValue()*node.getParent().getGameValue() )  + 10)/ (double) node.getVisited() 
-		// ;
 
-		// }
+		//Selection Strategy 2
 		if(node.getVisited() == 0){
 			return Double.POSITIVE_INFINITY;
 		}
@@ -225,22 +201,59 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 			return Double.POSITIVE_INFINITY;
 		}
 		else{
-		return node.gameValue + 0.5*Math.sqrt( (Math.log((double) node.getVisited())) / (double) node.getChildrenVisited() );
+		return node.getGameValue() + 0.5*Math.sqrt( (Math.log((double) node.getVisited())) / (double) node.getChildrenVisited() )
+		;
 		
 		}
 	}
 
+	public double selectionValue1(Node node){
+
+	//Selection Strategy 1
+	if(node.getVisited() == 0){
+		return Double.POSITIVE_INFINITY;
+	}
+	else{
+	Node parent = node.getParent();
+	return node.getGameValue()
+			+ 0.2*Math.sqrt( (Math.log((double) parent.getVisited())  ) / (double) node.getVisited());
+
+	}
+
+
+		// //Selection Strategy 2
+		// if(node.getVisited() == 0){
+		// 	return Double.POSITIVE_INFINITY;
+		// }
+		// else if(node.getChildrenVisited() == 0){
+		// 	return Double.POSITIVE_INFINITY;
+		// }
+		// else{
+		// return node.getGameValue() + 0.5*Math.sqrt( (Math.log((double) node.getVisited())) / (double) node.getChildrenVisited() )
+		// //  + (node.getGameValue() - node.getParent().getGameValue())
+		// ;
+		
+		// }
+	}
+
+
 	// Create new Solutions based on parent
 	public Solution[] expand(Solution[] parent) {
+
+		//expansion Strategy 1
 		Solution[] solutions = new Solution[variation.getArity()];
-		for (int i = 0; i < 50; i++) {
+			
 			solutions = variation.evolve(parent);
 			evaluateAll(solutions);
-			if(compareHeuristic(solutions[0], root.getSolution())){
-				return solutions;
-			}
-		}
 		return solutions;
+		// for (int i = 0; i < 50; i++) {
+		// 	solutions = variation.evolve(parent);
+		// 	evaluateAll(solutions);
+		// 	if(compareHeuristic(solutions[0], root.getSolution())){
+		// 		return solutions;
+		// 	}
+		// }
+		// return solutions;
 	}
 
 	// Update childrenVisted count

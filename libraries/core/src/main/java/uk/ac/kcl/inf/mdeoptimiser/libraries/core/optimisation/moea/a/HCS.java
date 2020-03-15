@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.core.EpsilonBoxDominanceArchive;
 import org.moeaframework.core.EpsilonBoxEvolutionaryAlgorithm;
@@ -108,34 +109,35 @@ public class HCS extends AbstractEvolutionaryAlgorithm implements
 
 	}
 
+	// -1 if solution 1 dominated solution 2
 	public int compareDomin(Solution solution1, Solution solution2){
 		return s.getComparator().compare(solution1, solution2);
 	}
 
 	// Create new Solutions based on parent
 	public Solution expand(Solution[] parent) {
+		// Solution equal = null;
+		// Solution[] solutions = new Solution[variation.getArity()];
+		// for (int i = 0; i < 50; i++) {
+		// 	solutions = variation.evolve(parent);
+		// 	evaluateAll(solutions);
+		// 	if(compareDomin(solutions[0], parent[0]) == -1){
+		// 		return solutions[0];
+		// 	}
+		// 	else if(compareDomin(solutions[0], parent[0]) == 0){
+		// 		equal = solutions[0];
+		// 	} 
+		// }
+		// return equal;
+	
 		Solution[] solutions = new Solution[variation.getArity()];
-		for (int i = 0; i < 50; i++) {
+		while (true) {
 			solutions = variation.evolve(parent);
 			evaluateAll(solutions);
 			if(compareDomin(solutions[0], parent[0]) == -1){
 				return solutions[0];
 			}
 		}
-		return null;
-	}
-
-
-	public Solution selection() {
-        Iterator<Solution> itr = population.iterator();
-        Solution besSolution = (Solution) itr.next();
-		while(itr.hasNext()){
-			Solution temp = (Solution) itr.next();
-			if(compareDomin(temp, besSolution) == -1){
-				besSolution = temp;
-			}
-		}
-		return besSolution;
 	}
 
 

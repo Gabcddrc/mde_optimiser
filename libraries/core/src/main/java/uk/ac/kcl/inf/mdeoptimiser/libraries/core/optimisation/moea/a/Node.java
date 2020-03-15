@@ -9,7 +9,7 @@ public class Node {
     protected Node right = null;
     protected Node parent = null;                 
     protected int visited = 0;
-    protected double gameValue = 0;
+    protected double gameValue = 0; // heuristic
     protected int childrenVisited = 0;
     // protected double childrenGameValueSq = 0.0;
 
