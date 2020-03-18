@@ -16,8 +16,8 @@ import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.executor.SolutionG
 import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.operators.MoeaOptimisationCrossoverVariation
 import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.operators.MoeaOptimisationMutationVariation
 import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.operators.MoeaProbabilisticVariation
-import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.a.MCTS
-import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.a.HCS
+import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.PSJ.MCTS
+import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.PSJ.HCS
 
 class MoeaOptimisationAlgorithmProvider extends AlgorithmProvider {
 	

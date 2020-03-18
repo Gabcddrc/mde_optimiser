@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the MOEA Framework.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.a;
+package uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.PSJ;
 
 import java.util.ArrayList;
 import java.util.Iterator;

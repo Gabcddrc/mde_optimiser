@@ -1,4 +1,4 @@
-package uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.a;
+package uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.PSJ;
 import org.moeaframework.core.Solution;
 import org.sidiff.common.emf.access.path.axis.Parent;
 
