@@ -124,13 +124,18 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 		selection();
 
 		backpropagation();
+
 		if(compareDomin(choice.getSolution(), best.getSolution()) == -1){
 			best = choice;
 		}
 		population.clear();
 		population.add(best.getSolution());
-		// System.out.println(++counter);
-		// population.truncate(3);
+
+
+		// //nrp output
+		// population.add(choice.getSolution());
+		// population.truncate(35);
+
 	}
 
 	public void initialization(){
@@ -201,7 +206,7 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 			return Double.POSITIVE_INFINITY;
 		}
 		else{
-		return node.getGameValue() + 0.5*Math.sqrt( (Math.log((double) node.getVisited())) / (double) node.getChildrenVisited() )
+		return node.getGameValue() + 0.2*Math.sqrt( (Math.log((double) node.getVisited())) / (double) node.getChildrenVisited() )
 		;
 		
 		}
@@ -216,7 +221,7 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 	else{
 	Node parent = node.getParent();
 	return node.getGameValue()
-			+ 0.2*Math.sqrt( (Math.log((double) parent.getVisited())  ) / (double) node.getVisited());
+			+ 0.1*Math.sqrt( (Math.log((double) parent.getVisited())  ) / (double) node.getVisited());
 
 	}
 
@@ -240,12 +245,13 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 	// Create new Solutions based on parent
 	public Solution[] expand(Solution[] parent) {
 
-		//expansion Strategy 1
-		Solution[] solutions = new Solution[variation.getArity()];
+		// //expansion Strategy 1
+		// Solution[] solutions = new Solution[variation.getArity()];
 			
-			solutions = variation.evolve(parent);
-			evaluateAll(solutions);
-		return solutions;
+		// 	solutions = variation.evolve(parent);
+		// 	evaluateAll(solutions);
+		// return solutions;
+
 		// for (int i = 0; i < 50; i++) {
 		// 	solutions = variation.evolve(parent);
 		// 	evaluateAll(solutions);
@@ -254,6 +260,26 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 		// 	}
 		// }
 		// return solutions;
+
+
+		Solution[] equal = null;
+		Solution[] solutions = new Solution[variation.getArity()];
+		for (int i = 0; i < 50; i++) {
+			solutions = variation.evolve(parent);
+			evaluateAll(solutions);
+			if(compareDomin(solutions[0], parent[0]) == -1){
+				return solutions;
+			}
+			else if(compareDomin(solutions[0], parent[0]) == 0){
+				equal = solutions;
+			} 
+		}
+
+		if(equal != null)
+			{return equal;}
+		else{
+			return variation.evolve(parent);
+			}	
 	}
 
 	// Update childrenVisted count

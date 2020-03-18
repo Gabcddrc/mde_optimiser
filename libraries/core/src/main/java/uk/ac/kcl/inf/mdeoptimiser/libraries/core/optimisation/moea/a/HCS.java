@@ -116,28 +116,21 @@ public class HCS extends AbstractEvolutionaryAlgorithm implements
 
 	// Create new Solutions based on parent
 	public Solution expand(Solution[] parent) {
-		// Solution equal = null;
-		// Solution[] solutions = new Solution[variation.getArity()];
-		// for (int i = 0; i < 50; i++) {
-		// 	solutions = variation.evolve(parent);
-		// 	evaluateAll(solutions);
-		// 	if(compareDomin(solutions[0], parent[0]) == -1){
-		// 		return solutions[0];
-		// 	}
-		// 	else if(compareDomin(solutions[0], parent[0]) == 0){
-		// 		equal = solutions[0];
-		// 	} 
-		// }
-		// return equal;
-	
+		Solution equal = null;
 		Solution[] solutions = new Solution[variation.getArity()];
-		while (true) {
+		for (int i = 0; i < 50; i++) {
 			solutions = variation.evolve(parent);
 			evaluateAll(solutions);
 			if(compareDomin(solutions[0], parent[0]) == -1){
 				return solutions[0];
 			}
+			else if(compareDomin(solutions[0], parent[0]) == 0){
+				equal = solutions[0];
+			} 
 		}
+		return equal;
+	
+
 	}
 
 

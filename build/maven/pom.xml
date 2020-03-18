@@ -21,8 +21,8 @@
 
   <properties>
     <maven.build.timestamp.format>yyyy.MM.dd.HHmmss</maven.build.timestamp.format>
-    <build.timestamp>2020.03.15.160945</build.timestamp>
-    <build.branch>b5f6b40</build.branch>
+    <build.timestamp>2020.03.17.193716</build.timestamp>
+    <build.branch>fdba54e</build.branch>
 	<global.version>1.0.0-SNAPSHOT</global.version>
     <!-- Generate a property with the root path of this project -->
     <!-- This is used as a reference for resolving local repositories -->
