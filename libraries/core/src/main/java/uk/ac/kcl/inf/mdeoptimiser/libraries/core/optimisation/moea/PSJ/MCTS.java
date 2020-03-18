@@ -149,14 +149,9 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 			Node right = new Node(expand(next)[0], null, null, root);
 			left.setGameValue(heuristicEstimate(left.getSolution()));
 			right.setGameValue(heuristicEstimate(right.getSolution()));
-			// Node d = chooseDominateNode(left, right);
-			// if(d != null){
-			// 	root.setSolution(d.getSolution());
-			// }
-			// else{
+
 			root.setLeft(left);
 			root.setRight(right);
-			// }
 		
 			best = root;
 	}
