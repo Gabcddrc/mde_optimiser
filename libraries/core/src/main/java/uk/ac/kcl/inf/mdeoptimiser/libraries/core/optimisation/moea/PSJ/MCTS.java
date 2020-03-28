@@ -22,7 +22,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.*;
+import java.util.Iterator;
 
+import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.executor.SolutionGenerator;
 
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.core.EpsilonBoxDominanceArchive;
@@ -35,43 +37,23 @@ import org.moeaframework.core.Problem;
 import org.moeaframework.core.Selection;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variation;
-import org.moeaframework.core.comparator.ChainedComparator;
-import org.moeaframework.core.comparator.CrowdingComparator;
 import org.moeaframework.core.comparator.DominanceComparator;
 import org.moeaframework.core.comparator.ParetoDominanceComparator;
 import org.moeaframework.core.operator.TournamentSelection;
 
-import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.IGuidanceFunction;
-import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.problem.MoeaOptimisationProblem;
+import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.problem.*;
 import org.eclipse.emf.ecore.EObject;
 import java.lang.Math; 
 
-/**
- * Implementation of NSGA-II, with the ability to attach an optional 
- * &epsilon;-dominance archive.
- * <p>
- * References:
- * <ol>
- *   <li>Deb, K. et al.  "A Fast Elitist Multi-Objective Genetic Algorithm:
- *       NSGA-II."  IEEE Transactions on Evolutionary Computation, 6:182-197, 
- *       2000.
- *   <li>Kollat, J. B., and Reed, P. M.  "Comparison of Multi-Objective 
- *       Evolutionary Algorithms for Long-Term Monitoring Design."  Advances in
- *       Water Resources, 29(6):792-807, 2006.
- * </ol>
- */
+
+
 public class MCTS extends AbstractEvolutionaryAlgorithm implements
 		EpsilonBoxEvolutionaryAlgorithm {
 
-	/**
-	 * The selection operator.  If {@code null}, this algorithm uses binary
-	 * tournament selection without replacement, replicating the behavior of the
-	 * original NSGA-II implementation.
-	 */
+
 	private final Selection selection;
 
-	// private MoeaOptimisationProblem moeaProblem;
-	// private List<IGuidanceFunction> fitnessFunctions;
+
 	/**
 	 * The variation operator.
 	 */
@@ -85,8 +67,12 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 	private Node root;
 	private Node best;
 	private Node choice;
+
+
+	MoeaOptimisationProblem moeaProblem;
+
 	/**
-	 * Constructs the NSGA-II algorithm with the specified components.
+	 * Parameters needed for MDEO to accept MCTS without adapter, however not necessary
 	 * 
 	 * @param problem the problem being solved
 	 * @param population the population used to store solutions
@@ -95,15 +81,20 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 	 * @param variation the variation operator
 	 * @param initialization the initialization method
 	 */
+
 	public MCTS(Problem problem, NondominatedSortingPopulation population,
 			EpsilonBoxDominanceArchive archive, Selection selection,
 			Variation variation, Initialization initialization) {
 		super(problem, population, archive, initialization);
-		// this.moeaProblem = (MoeaOptimisationProblem) problem;
-		// this.fitnessFunctions = moeaProblem.getConstraintFunctions();
+
+		this.moeaProblem = (MoeaOptimisationProblem) problem;
+
 		this.s = (TournamentSelection) selection;
+
 		this.selection = selection;
+
 		this.variation = variation;
+
 		root = new Node();
 
 	}
@@ -125,6 +116,7 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 
 		backpropagation();
 
+		//determine if the selected solution is the best
 		if(compareDomin(choice.getSolution(), best.getSolution()) == -1){
 			best = choice;
 		}
@@ -134,12 +126,14 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 
 		// //nrp output
 		// population.add(choice.getSolution());
-		// population.truncate(35);
+		// population.truncate(population.size());
 
 	}
 
 	public void initialization(){
-			root.setSolution(population.get(0));
+	
+			root.setSolution((Solution) moeaProblem.initialModelasSolution());
+
 			Solution[] next = new Solution[variation.getArity()];
 			for (int i = 0; i < next.length; i++) {
 				next[i] = root.getSolution();
@@ -186,11 +180,11 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 	public double heuristicEstimate(Solution solution){
 		evaluate(solution);
 		return ( -1.0*Arrays.stream(solution.getObjectives()).sum() )
-				 - 0.5 * Arrays.stream(solution.getConstraints()).sum()
+				 - 0.5 *Arrays.stream(solution.getConstraints()).sum()
 				 ;
 	}
 
-	//Selection Strategy
+	//Selection Strategy2
 	public double selectionValue(Node node){
 
 		//Selection Strategy 2
@@ -220,43 +214,21 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 
 	}
 
-
-		// //Selection Strategy 2
-		// if(node.getVisited() == 0){
-		// 	return Double.POSITIVE_INFINITY;
-		// }
-		// else if(node.getChildrenVisited() == 0){
-		// 	return Double.POSITIVE_INFINITY;
-		// }
-		// else{
-		// return node.getGameValue() + 0.5*Math.sqrt( (Math.log((double) node.getVisited())) / (double) node.getChildrenVisited() )
-		// //  + (node.getGameValue() - node.getParent().getGameValue())
-		// ;
-		
-		// }
 	}
 
 
 	// Create new Solutions based on parent
 	public Solution[] expand(Solution[] parent) {
 
-		// //expansion Strategy 1
+		//expansion Strategy 1
 		// Solution[] solutions = new Solution[variation.getArity()];
 			
 		// 	solutions = variation.evolve(parent);
 		// 	evaluateAll(solutions);
 		// return solutions;
 
-		// for (int i = 0; i < 50; i++) {
-		// 	solutions = variation.evolve(parent);
-		// 	evaluateAll(solutions);
-		// 	if(compareHeuristic(solutions[0], root.getSolution())){
-		// 		return solutions;
-		// 	}
-		// }
-		// return solutions;
 
-
+		//expansion Strategy 2
 		Solution[] equal = null;
 		Solution[] solutions = new Solution[variation.getArity()];
 		for (int i = 0; i < 50; i++) {
@@ -285,11 +257,13 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 			back = back.getParent();
 
 			back.setChildrenVisited(back.getLeft().getChildrenVisited()+back.getLeft().getVisited() + back.getRight().getChildrenVisited()+back.getRight().getVisited());
-
-			// back.setChildrenGameValuesq(back.getLeft().getGameValue()*back.getLeft().getGameValue() + back.getLeft().getChildrenGameValueSq() +  back.getRight().getGameValue()*back.getRight().getGameValue() + back.getRight().getChildrenGameValueSq());	
 	
+			//new heuristics update
+			double difference = ((back.getLeft().getGameValue()+back.getRight().getGameValue())/ 2.0) - back.getGameValue();
+			back.setGameValue(back.getGameValue() + difference);
 
-			back.setGameValue((back.getLeft().getGameValue()+back.getRight().getGameValue())/ 2.0 );
+			//old heuristic update
+			// back.setGameValue((back.getLeft().getGameValue()+back.getRight().getGameValue())/ 2.0 );
 	
 		}
 	}

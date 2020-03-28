@@ -73,7 +73,7 @@ public class HCS extends AbstractEvolutionaryAlgorithm implements
 
 	private final TournamentSelection s;
 	/**
-	 * Constructs the NSGA-II algorithm with the specified components.
+	 * Constructs the Hill Climbing algorithm with the specified components.
 	 * 
 	 * @param problem the problem being solved
 	 * @param population the population used to store solutions
@@ -104,6 +104,10 @@ public class HCS extends AbstractEvolutionaryAlgorithm implements
 		if(besSolution!= null){
 			population.clear();
 			population.add(besSolution);
+
+		// //nrp output	
+		// population.add(besSolution);
+		// population.truncate(population.size());
 		}
 
 

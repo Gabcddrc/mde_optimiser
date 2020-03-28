@@ -27,7 +27,6 @@ class MoeaOptimisationAlgorithmProvider extends AlgorithmProvider {
 		switch algorithm {
 			case "NSGAII":
 				this.algorithm = createNSGAII(problem, properties)
-				// this.algorithm = createMCTS(problem, properties)
 			case "MCTS":
 				this.algorithm = createMCTS(problem, properties)
 			case "HCS":

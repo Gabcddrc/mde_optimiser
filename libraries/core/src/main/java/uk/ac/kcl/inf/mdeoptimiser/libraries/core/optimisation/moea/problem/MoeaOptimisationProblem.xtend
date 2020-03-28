@@ -83,4 +83,8 @@ class MoeaOptimisationProblem extends AbstractProblem {
 		new MoeaOptimisationSolution(solutionGenerator)
 	}
 
+	//PSJ: create a new solution representing the starting model
+	def initialModelasSolution() {
+		new MoeaOptimisationSolution(solutionGenerator, 1);
+	}
 }

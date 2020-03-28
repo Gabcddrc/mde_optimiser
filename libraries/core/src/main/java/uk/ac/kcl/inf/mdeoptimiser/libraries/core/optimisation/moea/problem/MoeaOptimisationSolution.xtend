@@ -25,6 +25,15 @@ class MoeaOptimisationSolution extends Solution {
 		this.solutionGenerator = solutionGenerator;
 		setModel(solutionGenerator.mutate(solutionGenerator.initialSolutions.head))
 	}
+
+	//PSJ: Generate the vanilla model as a soluion 
+	new(SolutionGenerator solutionGenerator, int n){
+		this(solutionGenerator.optimisationModel.goal.objectives.size(), 
+			solutionGenerator.optimisationModel.goal.constraints.size()
+		)
+		this.solutionGenerator = solutionGenerator;
+		setModel(solutionGenerator.initialSolutions.head)
+	}
 	
 	override MoeaOptimisationSolution copy(){
 		new MoeaOptimisationSolution(this);
