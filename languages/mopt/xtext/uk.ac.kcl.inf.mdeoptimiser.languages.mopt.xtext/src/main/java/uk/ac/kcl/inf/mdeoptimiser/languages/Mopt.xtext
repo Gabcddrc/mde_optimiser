@@ -181,6 +181,7 @@ terminal ALGORITHM_FACTORY returns ecore::EString:
 
 //One initial algorithm - org.moeaframework.algorithm.StandardAlgorithms
 //These should each require its own properties
+//PSJ added MCTS and HCS, to allow these two algorithms to be set in DSL for the problem
 terminal ALGORITHM_NAME returns ecore::EString:
 	('eMOEA' | 'eNSGAII' | 'NSGAII'| 'NSGAIII' | 'SPEA2' | 'MCTS' | 'HCS')
 ;

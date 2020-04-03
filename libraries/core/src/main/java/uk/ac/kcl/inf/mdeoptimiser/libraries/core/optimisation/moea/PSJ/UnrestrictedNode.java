@@ -1,36 +1,40 @@
 package uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.PSJ;
+
 import org.moeaframework.core.Solution;
 import org.sidiff.common.emf.access.path.axis.Parent;
+import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.problem.MoeaOptimisationSolution;
+import java.util.ArrayList;
 
-public class Node {
+public class UnrestrictedNode {
 
-    protected Solution solution;
-    protected Node left = null;
-    protected Node right = null;
-    protected Node parent = null;                 
+    protected MoeaOptimisationSolution solution = null;
+    protected UnrestrictedNode parent = null;                 
     protected int visited = 0;
     protected double gameValue = 0; // heuristic
     protected int childrenVisited = 0;
+    public UnrestrictedNode[] children = null;
 
-    Node(Solution solution) {
+    UnrestrictedNode(MoeaOptimisationSolution solution) {
         this.solution = solution;
     }
 
-    public Node() {
+    public UnrestrictedNode() {
     }
 
-    public Node(Solution solution, Node left, Node right, Node parent) {
-        this.solution = solution;
-        this.left = left;
-        this.right = right;
-        this.parent = parent;
+
+    public void setChildren(UnrestrictedNode[] children){
+        this.children = children;
     }
 
-    public Solution getSolution() {
+    public UnrestrictedNode[] getChildren(){
+        return this.children;
+    }
+
+    public MoeaOptimisationSolution getSolution() {
         return this.solution;
     }
 
-    public void setSolution(Solution solution) {
+    public void setSolution(MoeaOptimisationSolution solution) {
         this.solution = solution;
     }
 
@@ -57,27 +61,11 @@ public class Node {
         return visited;
     }
 
-    public Node getLeft() {
-        return this.left;
-    }
-
-    public void setLeft(Node left) {
-        this.left = left;
-    }
-
-    public Node getRight() {
-        return this.right;
-    }
-
-    public void setRight(Node right) {
-        this.right = right;
-    }
-
-    public Node getParent() {
+    public UnrestrictedNode getParent() {
         return this.parent;
     }
 
-    public void setParent(Node parent) {
+    public void setParent(UnrestrictedNode parent) {
         this.parent = parent;
     }
 }

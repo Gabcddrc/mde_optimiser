@@ -27,10 +27,13 @@ class MoeaOptimisationAlgorithmProvider extends AlgorithmProvider {
 		switch algorithm {
 			case "NSGAII":
 				this.algorithm = createNSGAII(problem, properties)
+
+			//PSJ: allow users to chose MCTS and Hill Climbing
 			case "MCTS":
 				this.algorithm = createMCTS(problem, properties)
 			case "HCS":
 				this.algorithm = createHCS(problem, properties )
+
 			default:
 				throw new UnexpectedAlgorithmException(algorithm)
 		}
@@ -87,6 +90,7 @@ class MoeaOptimisationAlgorithmProvider extends AlgorithmProvider {
 			);
 	}
 
+	//PSJ: method for creating MCTS
 	def Algorithm createMCTS(Problem problem, Properties properties){
 		//Create an initial random population of population size
 		var initialization = new RandomInitialization(problem, properties.get("populationSize") as Integer)
@@ -105,6 +109,7 @@ class MoeaOptimisationAlgorithmProvider extends AlgorithmProvider {
 	}
 
 
+	//PSJ: method for creating Hill Climbing
 	def Algorithm createHCS(Problem problem, Properties properties){
 		//Create an initial random population of population size
 		var initialization = new RandomInitialization(problem, properties.get("populationSize") as Integer)

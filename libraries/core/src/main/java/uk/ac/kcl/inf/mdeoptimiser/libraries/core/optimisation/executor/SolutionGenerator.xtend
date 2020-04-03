@@ -53,6 +53,11 @@ class SolutionGenerator {
 		this.mutationStepSizeStrategy = mutationStepSizeStrategy;
 	}
 
+	//PSJ: return component needed for mutation 
+	def getHenshinExcutor() {
+		return this.henshinExecutor
+	}
+
 	// TODO IOC
 	def getMutationStrategy() {
 

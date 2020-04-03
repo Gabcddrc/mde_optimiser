@@ -1,20 +1,4 @@
-/* Copyright 2009-2016 David Hadka
- *
- * This file is part of the MOEA Framework.
- *
- * The MOEA Framework is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- *
- * The MOEA Framework is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
- * License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with the MOEA Framework.  If not, see <http://www.gnu.org/licenses/>.
- */
+
 package uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.PSJ;
 
 import java.util.ArrayList;
@@ -22,26 +6,22 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.*;
-import java.util.Iterator;
 
-import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.executor.SolutionGenerator;
 
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.core.EpsilonBoxDominanceArchive;
 import org.moeaframework.core.EpsilonBoxEvolutionaryAlgorithm;
 import org.moeaframework.core.Initialization;
 import org.moeaframework.core.NondominatedSortingPopulation;
-import org.moeaframework.core.PRNG;
 import org.moeaframework.core.Population;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Selection;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variation;
-import org.moeaframework.core.comparator.DominanceComparator;
-import org.moeaframework.core.comparator.ParetoDominanceComparator;
+
 import org.moeaframework.core.operator.TournamentSelection;
 
-import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.problem.*;
+import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.moea.problem.MoeaOptimisationProblem;
 import org.eclipse.emf.ecore.EObject;
 import java.lang.Math; 
 
@@ -68,7 +48,6 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 	private Node best;
 	private Node choice;
 
-
 	MoeaOptimisationProblem moeaProblem;
 
 	/**
@@ -81,38 +60,32 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 	 * @param variation the variation operator
 	 * @param initialization the initialization method
 	 */
-
 	public MCTS(Problem problem, NondominatedSortingPopulation population,
 			EpsilonBoxDominanceArchive archive, Selection selection,
 			Variation variation, Initialization initialization) {
 		super(problem, population, archive, initialization);
-
 		this.moeaProblem = (MoeaOptimisationProblem) problem;
-
 		this.s = (TournamentSelection) selection;
-
 		this.selection = selection;
-
 		this.variation = variation;
-
 		root = new Node();
 
 	}
 
 	@Override
 	public void iterate() {
-		System.out.println("start MCTS");
+
 		NondominatedSortingPopulation population = getPopulation();
 
 		if (root.solution == null) {
 			initialization();
 		}
-		else{
-			expansionMain();
-		}
 
+	
 		//select the Node/solution to expand
 		selection();
+
+		expansionMain();
 
 		backpropagation();
 
@@ -120,6 +93,7 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 		if(compareDomin(choice.getSolution(), best.getSolution()) == -1){
 			best = choice;
 		}
+
 		population.clear();
 		population.add(best.getSolution());
 
@@ -131,22 +105,7 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 	}
 
 	public void initialization(){
-	
-			root.setSolution((Solution) moeaProblem.initialModelasSolution());
-
-			Solution[] next = new Solution[variation.getArity()];
-			for (int i = 0; i < next.length; i++) {
-				next[i] = root.getSolution();
-			}
-
-			Node left = new Node(expand(next)[0], null, null, root);
-			Node right = new Node(expand(next)[0], null, null, root);
-			left.setGameValue(heuristicEstimate(left.getSolution()));
-			right.setGameValue(heuristicEstimate(right.getSolution()));
-
-			root.setLeft(left);
-			root.setRight(right);
-		
+			root.setSolution( moeaProblem.initialModelasSolution());
 			best = root;
 	}
 
@@ -249,7 +208,7 @@ public class MCTS extends AbstractEvolutionaryAlgorithm implements
 			}	
 	}
 
-	// Update childrenVisted count
+	// Update childrenVisted count/heuristics
 	public void backpropagation(){
 		Node back = choice;
 		
